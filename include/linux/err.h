@@ -52,7 +52,7 @@ static inline void * __must_check ERR_CAST(const void *ptr)
 	return (void *) ptr;
 }
 
-static inline int __must_check PTR_RET(const void *ptr)
+static inline int __must_check PTR_ERR_OR_ZERO(const void *ptr)
 {
 	if (IS_ERR(ptr))
 		return PTR_ERR(ptr);
@@ -60,8 +60,8 @@ static inline int __must_check PTR_RET(const void *ptr)
 		return 0;
 }
 
-/* for backport */
-#define PTR_ERR_OR_ZERO(p) PTR_RET(p)
+/* Deprecated */
+#define PTR_RET(p) PTR_ERR_OR_ZERO(p)
 
 #endif
 
