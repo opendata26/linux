@@ -34,7 +34,7 @@ extern unsigned long __sw_hweight64(__u64 w);
  * We need the ugly external functions to break header recursion hell.
  */
 #ifndef smp_mb__before_clear_bit
-static inline void __deprecated smp_mb__before_clear_bit(void)
+static inline void smp_mb__before_clear_bit(void)
 {
 	extern void __smp_mb__before_atomic(void);
 	__smp_mb__before_atomic();
@@ -42,7 +42,7 @@ static inline void __deprecated smp_mb__before_clear_bit(void)
 #endif
 
 #ifndef smp_mb__after_clear_bit
-static inline void __deprecated smp_mb__after_clear_bit(void)
+static inline void smp_mb__after_clear_bit(void)
 {
 	extern void __smp_mb__after_atomic(void);
 	__smp_mb__after_atomic();
