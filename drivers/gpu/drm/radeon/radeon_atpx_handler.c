@@ -8,8 +8,7 @@
  */
 #include <linux/vga_switcheroo.h>
 #include <linux/slab.h>
-#include <acpi/acpi.h>
-#include <acpi/acpi_bus.h>
+#include <linux/acpi.h>
 #include <linux/pci.h>
 
 #include "radeon_acpi.h"
@@ -34,6 +33,7 @@ static struct radeon_atpx_priv {
 	bool atpx_detected;
 	/* handle for device - and atpx */
 	acpi_handle dhandle;
+	acpi_handle other_handle;
 	struct radeon_atpx atpx;
 } radeon_atpx_priv;
 
@@ -58,6 +58,10 @@ struct atpx_mux {
 	u16 size;
 	u16 mux;
 } __packed;
+
+bool radeon_has_atpx(void) {
+	return radeon_atpx_priv.atpx_detected;
+}
 
 /**
  * radeon_atpx_call - call an ATPX method
@@ -449,9 +453,10 @@ static bool radeon_atpx_pci_probe_handle(struct pci_dev *pdev)
 		return false;
 
 	status = acpi_get_handle(dhandle, "ATPX", &atpx_handle);
-	if (ACPI_FAILURE(status))
+	if (ACPI_FAILURE(status)) {
+		radeon_atpx_priv.other_handle = dhandle;
 		return false;
-
+	}
 	radeon_atpx_priv.dhandle = dhandle;
 	radeon_atpx_priv.atpx.handle = atpx_handle;
 	return true;
