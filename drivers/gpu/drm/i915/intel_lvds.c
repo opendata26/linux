@@ -76,7 +76,7 @@ static bool intel_lvds_get_hw_state(struct intel_encoder *encoder,
 	u32 tmp;
 
 	power_domain = intel_display_port_power_domain(encoder);
-	if (!intel_display_power_enabled(dev_priv, power_domain))
+	if (!intel_display_power_is_enabled(dev_priv, power_domain))
 		return false;
 
 	tmp = I915_READ(lvds_encoder->reg);
@@ -1126,6 +1126,7 @@ out:
 	lvds_encoder->a3_power = I915_READ(lvds_encoder->reg) &
 				 LVDS_A3_POWER_MASK;
 
+<<<<<<< HEAD
 	/*
 	 * Unlock registers and just
 	 * leave them unlocked
@@ -1138,6 +1139,8 @@ out:
 			   I915_READ(PP_CONTROL) | PANEL_UNLOCK_REGS);
 	}
 >>>>>>> 2936f7cbf3ef... drm: backport from v3.18-rc3
+=======
+>>>>>>> 1f239edaa5e7... drm: backport from v3.19-rc4
 	lvds_connector->lid_notifier.notifier_call = intel_lid_notify;
 	if (acpi_lid_notifier_register(&lvds_connector->lid_notifier)) {
 		DRM_DEBUG_KMS("lid notifier registration failed\n");
@@ -1146,7 +1149,7 @@ out:
 	drm_connector_register(connector);
 
 	intel_panel_init(&intel_connector->panel, fixed_mode, downclock_mode);
-	intel_panel_setup_backlight(connector);
+	intel_panel_setup_backlight(connector, INVALID_PIPE);
 
 	return;
 
