@@ -117,3 +117,21 @@ config WII
 	help
 	  Select WII if configuring for the Nintendo Wii.
 	  More information at: <http://gc-linux.sourceforge.net/>
+
+config WIIU
+	bool "Nintendo Wii U"
+	depends on EMBEDDED6xx && USB_ARCH_HAS_HCD
+	select IRQ_DOMAIN_HIERARCHY
+	select IRQ_DOMAIN_DEBUG
+	select NOT_COHERENT_CACHE
+	select HAVE_GENERIC_DMA_COHERENT
+	select USB_ARCH_HAS_EHCI if USB_SUPPORT
+	select USB_ARCH_HAS_OHCI if USB_SUPPORT
+	help
+	  Wii U.
+
+config WIIU_UDBG
+	bool "Wii U udbg support"
+	depends on WIIU
+	help
+	  Wii U udbg

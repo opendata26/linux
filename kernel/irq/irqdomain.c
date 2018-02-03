@@ -1729,7 +1729,7 @@ static int irq_domain_debug_show(struct seq_file *m, void *p)
 
 static int irq_domain_debug_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, irq_domain_debug_show, inode->i_private);
+	return 0 //single_open(file, irq_domain_debug_show, inode->i_private);
 }
 
 static const struct file_operations dfs_domain_ops = {

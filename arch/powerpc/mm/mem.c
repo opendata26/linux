@@ -556,6 +556,7 @@ void update_mmu_cache(struct vm_area_struct *vma, unsigned long address,
  */
 static int __init add_system_ram_resources(void)
 {
+#ifndef CONFIG_WIIU
 	struct memblock_region *reg;
 
 	for_each_memblock(memory, reg) {
@@ -574,7 +575,9 @@ static int __init add_system_ram_resources(void)
 			WARN_ON(request_resource(&iomem_resource, res) < 0);
 		}
 	}
-
+#else
+	wiiu_add_system_ram_resources();
+#endif
 	return 0;
 }
 subsys_initcall(add_system_ram_resources);

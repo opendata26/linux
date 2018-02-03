@@ -983,7 +983,7 @@ config PPC_PCI_CHOICE
 config PCI
 	bool "PCI support" if PPC_PCI_CHOICE
 	default y if !40x && !CPM2 && !PPC_8xx && !PPC_83xx \
-		&& !PPC_85xx && !PPC_86xx && !GAMECUBE_COMMON
+		&& !PPC_85xx && !PPC_86xx && !GAMECUBE_COMMON && !CONFIG_WIIU
 	default PCI_QSPAN if PPC_8xx
 	select GENERIC_PCI_IOMAP
 	help
@@ -1143,7 +1143,7 @@ config KERNEL_START
 
 config PHYSICAL_START_BOOL
 	bool "Set physical address where the kernel is loaded"
-	depends on ADVANCED_OPTIONS && FLATMEM && FSL_BOOKE
+	depends on ADVANCED_OPTIONS && FLATMEM
 	help
 	  This gives the physical address where the kernel is loaded.
 

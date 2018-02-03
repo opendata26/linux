@@ -214,6 +214,14 @@ isection=.kernel:initrd
 link_address='0x400000'
 make_space=y
 
+# physical offset of kernel image
+membase=`${CROSS}objdump -p "$kernel" | grep -m 1 LOAD | awk '{print $7}'`
+
+vmz="$tmpdir/`basename \"$kernel\"`.$ext"
+# Calculate the vmlinux.strip size
+${CROSS}objcopy $objflags "$kernel" "$vmz.$$"
+strip_size=$(stat -c %s $vmz.$$)
+
 case "$platform" in
 of)
     platformo="$object/of.o $object/epapr.o"
@@ -326,6 +334,11 @@ gamecube|wii)
     link_address='0x600000'
     platformo="$object/$platform-head.o $object/$platform.o"
     ;;
+wiiu)
+	link_address=$(printf "0x%X" $(((membase + strip_size + 0xfffff) & 0xfff00000)))
+	platformo="$object/wiiu-head.o $object/wiiu.o"
+	make_space=n
+    ;;
 treeboot-currituck)
     link_address='0x1000000'
     ;;
@@ -350,12 +363,6 @@ mvme7100)
     binary=y
     ;;
 esac
-
-vmz="$tmpdir/`basename \"$kernel\"`.$ext"
-
-# Calculate the vmlinux.strip size
-${CROSS}objcopy $objflags "$kernel" "$vmz.$$"
-strip_size=$(stat -c %s $vmz.$$)
 
 if [ -z "$cacheit" -o ! -f "$vmz$compression" -o "$vmz$compression" -ot "$kernel" ]; then
     # recompress the image if we need to
@@ -406,8 +413,9 @@ if [ -n "$version" ]; then
     uboot_version="-n Linux-$version"
 fi
 
-# physical offset of kernel image
-membase=`${CROSS}objdump -p "$kernel" | grep -m 1 LOAD | awk '{print $7}'`
+echo KERNEL INFO
+${CROSS}objdump -p "$kernel"
+echo Wrapper linking at $link_address
 
 case "$platform" in
 uboot)

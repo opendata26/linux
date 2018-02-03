@@ -249,6 +249,14 @@ config USB_EHCI_HCD_PPC_OF
 	  Enables support for the USB controller present on the PowerPC
 	  OpenFirmware platform bus.
 
+config USB_EHCI_HCD_WIIU
+	bool "Nintendo Wii U EHCI USB controller support"
+	depends on USB_EHCI_HCD && WIIU
+	default y
+	---help---
+	  Say Y here to support the EHCI USB controller found in the
+	  Nintendo Wii U video game console.
+
 config USB_EHCI_SH
 	bool "EHCI support for SuperH USB controller"
 	depends on SUPERH
@@ -522,6 +530,15 @@ config USB_OHCI_HCD_PPC_OF
 	bool
 	depends on PPC
 	default USB_OHCI_HCD_PPC_OF_BE || USB_OHCI_HCD_PPC_OF_LE
+
+config USB_OHCI_HCD_WIIU
+	bool "Nintendo Wii U OHCI USB controller support"
+	depends on USB_OHCI_HCD && WIIU
+	select USB_OHCI_LITTLE_ENDIAN
+	default y
+	---help---
+	  Say Y here to support the OHCI USB controller found in the
+	  Nintendo Wii U video game console.
 
 config USB_OHCI_HCD_PCI
 	tristate "OHCI support for PCI-bus USB controllers"

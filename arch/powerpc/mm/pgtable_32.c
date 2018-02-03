@@ -236,7 +236,7 @@ int map_kernel_page(unsigned long va, phys_addr_t pa, int flags)
 /*
  * Map in a chunk of physical memory starting at start.
  */
-static void __init __mapin_ram_chunk(unsigned long offset, unsigned long top)
+void __init __mapin_ram_chunk(unsigned long offset, unsigned long top)
 {
 	unsigned long v, s, f;
 	phys_addr_t p;
@@ -261,13 +261,15 @@ static void __init __mapin_ram_chunk(unsigned long offset, unsigned long top)
 
 void __init mapin_ram(void)
 {
+#if !defined(CONFIG_WII) && !defined(CONFIG_WIIU)
 	unsigned long s, top;
-
-#ifndef CONFIG_WII
 	top = total_lowmem;
 	s = mmu_mapin_ram(top);
 	__mapin_ram_chunk(s, top);
+#elif defined(CONFIG_WIIU)
+	wiiu_map_ram();
 #else
+	unsigned long s, top;
 	if (!wii_hole_size) {
 		s = mmu_mapin_ram(total_lowmem);
 		__mapin_ram_chunk(s, total_lowmem);

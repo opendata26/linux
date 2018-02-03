@@ -168,6 +168,9 @@ __after_mmu_off:
 #ifdef CONFIG_PPC_EARLY_DEBUG_USBGECKO
 	bl	setup_usbgecko_bat
 #endif
+#ifdef CONFIG_PPC_EARLY_DEBUG_WIIU
+	bl setup_wiiu_udbg_bat
+#endif
 
 /*
  * Call setup_cpu for CPU 0 and initialize 6xx Idle
@@ -1218,6 +1221,17 @@ setup_usbgecko_bat:
 	ori	r11, r11, 0x2	/* 128K, Vs=1, Vp=0 */
 	mtspr	SPRN_DBAT1L, r8
 	mtspr	SPRN_DBAT1U, r11
+	blr
+#endif
+
+#ifdef CONFIG_PPC_EARLY_DEBUG_WIIU
+setup_wiiu_udbg_bat:
+	lis r8, 0x0d80
+	ori r8, r8, 0x002a
+	lis r11, 0xfffe
+	ori r11, r11, 0x2
+	mtspr SPRN_DBAT1L, r8
+	mtspr SPRN_DBAT1U, r11
 	blr
 #endif
 

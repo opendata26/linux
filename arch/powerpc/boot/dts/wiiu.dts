@@ -1,0 +1,211 @@
+/*
+ * arch/powerpc/boot/dts/wiiu.dts
+ *
+ * Nintendo Wii U
+ * Copyright (C) 2017 Ash Logan <quarktheawesome@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ */
+
+/dts-v1/;
+
+/ {
+	model = "nintendo,wiiu";
+	compatible = "nintendo,wiiu";
+
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	chosen {
+		bootargs = "root=/dev/sda1 rootwait udbg-immortal";
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x00000000 0x02000000   /* MEM1   32MB */
+			   0x10000000 0x80000000>; /* MEM2   2GB  */
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+		
+		/* Reserve 16MB for contiguous allocations
+		linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x1000000>;
+			alignment = <0x2000>;
+			linux,cma-default;
+		}; */
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* TODO: other cores */
+		PowerPC,espresso@0 {
+			device_type = "cpu";
+			reg = <0>;
+
+			clock-frequency = <1243125000>;		/* 1.243125GHz */
+			bus-frequency = <248625000>;		/* 248.625MHz core-to-bus 5x */
+			timebase-frequency = <62156250>;	/* This value is probably quite wrong, it's only an approximation */
+
+			i-cache-line-size = <32>;
+			d-cache-line-size = <32>;
+			i-cache-size = <32768>;
+			d-cache-size = <32768>;
+		};
+	};
+
+	/* Devices contained in the latte chipset */
+	latte {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "nintendo,latte";
+		ranges = <0x0c000000 0x0c000000 0x00200000		/* Espresso registers */
+				  0x0c200000 0x0c200000 0x00010000		/* GX2 */
+				  0x0d006000 0x0d006000 0x00001000		/* Legacy hollywood registers */
+				  0x0d010000 0x0d010000 0x00190000		/* Latte devices registers */
+				  0x0d800000 0x0d800000 0x00800000>;	/* Latte registers */
+
+		/* MEMLESS DEVICES */
+
+		pwrbutton: pwrbutton {
+  			compatible = "nintendo,wiiu-pwrbutton";
+  			interrupt-parent = <&pic1>;
+  			interrupts = <30>;
+  		};
+
+		/* ESPRESSO DEVICES (0x0c000000) */
+
+		gx2: gx2@0c200000 {
+	        compatible = "nintendo,wiiufb";
+			reg = <0x0c200000 0x10000>;
+	    };
+
+		pic0: pic0@0c000000 {
+			#interrupt-cells = <1>;
+			compatible = "nintendo,espresso-pic";
+			reg = <0x0c000000 0x8C>;
+			interrupt-controller;
+		};
+
+		/* LATTE DEVICES (0x0d000000) */
+		pic1: pic1@0d800440 {
+			#interrupt-cells = <1>;
+			compatible = "nintendo,latte-ahball-pic";
+			reg = <0x0d800440 0x10>;
+			interrupt-controller;
+			interrupt-parent = <&pic0>;
+			interrupts = <24>;
+		};
+
+		usb@0d040000 {
+			compatible = "nintendo,wiiu-usb-ehci",
+					"usb-ehci";
+			reg = <0x0d040000 0x100>;
+			interrupts = <4>;
+			interrupt-parent = <&pic1>;
+		};
+
+		usb@0d050000 {
+			compatible = "nintendo,wiiu-usb-ohci",
+					"usb-ohci";
+			reg = <0x0d050000 0x100>;
+			interrupts = <5>;
+			interrupt-parent = <&pic1>;
+		};
+
+		usb@0d060000 {
+			compatible = "nintendo,wiiu-usb-ohci",
+					"usb-ohci";
+			reg = <0x0d060000 0x100>;
+			interrupts = <6>;
+			interrupt-parent = <&pic1>;
+		};
+		
+		/* SDCard */
+		sd@0d070000 {
+			compatible = "nintendo,latte-sdhci";
+			reg = <0x0d070000 0x200>;
+			interrupts = <7>;
+			interrupt-parent = <&pic1>;
+		};
+		
+		/* SDIO BCM43362 */
+		sdio@0d080000 {
+			compatible = "nintendo,latte-sdhci";
+			reg = <0x0d080000 0x200>;
+			interrupts = <8>;
+			interrupt-parent = <&pic1>;
+			non-removable;
+			/*
+			This shouldn't be needed, since SDIO should be able to detect the device
+			(it doesn't work anyway)
+			#address-cells = <1>;
+			#size-cells = <0>;
+			
+			bcrmf@1 {
+				reg = <1>;
+				compatible = "brcm,bcm43362-fmac", "brcm,bcm4329-fmac";
+				interrupt-parent = <&pic1>;
+				interrupts = <8>;
+			};*/
+		};
+
+		/* EHCI-1
+		usb@0d120000 {
+			compatible = "nintendo,wiiu-usb-ehci";
+			reg = <0x0d120000 0x100>;
+			interrupts = <?>;
+			interrupt-parent = <&pic1>;
+			usb-shared-irq;
+		}; */
+
+		/* OHCI-1:0
+		usb@0d130000 {
+			compatible = "nintendo,wiiu-usb-ohci";
+			reg = <0x0d130000 0x100>;
+			interrupts = <?>;
+			interrupt-parent = <&pic1>;
+		}; */
+
+		/* EHCI-2
+		usb@0d140000 {
+			compatible = "nintendo,wiiu-usb-ehci";
+			reg = <0x0d140000 0x100>;
+			interrupts = <?>;
+			interrupt-parent = <&pic1>;
+			usb-shared-irq;
+		}; */
+
+		/* OHCI-2:0
+		usb@0d150000 {
+			compatible = "nintendo,wiiu-usb-ohci", "usb-ohci";
+			reg = <0x0d150000 0x100>;
+			interrupts = <?>;
+			interrupt-parent = <&pic1>;
+		}; */
+
+		/*sata@0d160400 {
+			compatible = "generic-ahci";
+			reg = <0x0d160400 0x10000>;
+			interrupts = <7>;
+			interrupt-parent = <&pic1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			sata1: sata-port@1 {
+				reg = <1>;
+			};
+		};*/
+	};
+};

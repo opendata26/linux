@@ -33,6 +33,17 @@ struct memcons {
 	char *input_end;
 };
 
+#ifdef CONFIG_WIIU
+struct memcons memcons = {
+	.output_start = (char*)0xfffe1000,
+	.output_pos = (char*)0xfffe1000,
+	.output_end = (char*)0xfffe1000 + CONFIG_PPC_MEMCONS_OUTPUT_SIZE,
+	.input_start = (char*)0xfffe2000,
+	.input_pos = (char*)0xfffe2000,
+	.input_end = (char*)0xfffe2000 + CONFIG_PPC_MEMCONS_INPUT_SIZE,
+};
+unsigned int i;
+#else
 static char memcons_output[CONFIG_PPC_MEMCONS_OUTPUT_SIZE];
 static char memcons_input[CONFIG_PPC_MEMCONS_INPUT_SIZE];
 
@@ -44,6 +55,7 @@ struct memcons memcons = {
 	.input_pos = memcons_input,
 	.input_end = &memcons_input[CONFIG_PPC_MEMCONS_INPUT_SIZE],
 };
+#endif
 
 void memcons_putc(char c)
 {
@@ -51,6 +63,11 @@ void memcons_putc(char c)
 
 	*memcons.output_pos = c;
 	wmb();
+	#ifdef CONFIG_WIIU
+	for (i = 0xfffe1000; i < 0xfffe2000; i++) {
+		__asm__ ("dcbf	0, %[addr]" : : [addr]"r"(i));
+	}
+	#endif
 	new_output_pos = memcons.output_pos + 1;
 	if (new_output_pos >= memcons.output_end)
 		new_output_pos = memcons.output_start;

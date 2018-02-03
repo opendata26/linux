@@ -241,6 +241,13 @@ config PPC_EARLY_DEBUG_CPM
 	  using a CPM-based serial port.  This assumes that the bootwrapper
 	  has run, and set up the CPM in a particular way.
 
+config PPC_EARLY_DEBUG_WIIU
+	bool "Early debugging over the Wii U's IPC"
+	depends on WIIU
+	select WIIU_UDBG
+	help
+	  Wii U early udbg
+
 config PPC_EARLY_DEBUG_USBGECKO
 	bool "Early debugging through the USB Gecko adapter"
 	depends on GAMECUBE_COMMON

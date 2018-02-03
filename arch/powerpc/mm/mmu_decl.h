@@ -123,6 +123,12 @@ extern unsigned long wii_mmu_mapin_mem2(unsigned long top);
 extern void wii_memory_fixups(void);
 #endif
 
+#ifdef CONFIG_WIIU
+extern void wiiu_map_ram(void);
+extern void wiiu_memory_fixups(void);
+extern void wiiu_add_system_ram_resources(void);
+#endif
+
 /* ...and now those things that may be slightly different between processor
  * architectures.  -- Dan
  */
