@@ -692,7 +692,7 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 	struct dma_async_tx_descriptor *txd, *rxd = NULL;
 	int ret = 0, idx = 0, limit = QUP_READ_LIMIT;
 	dma_cookie_t cookie_rx, cookie_tx;
-	u32 rx_nents = 0, tx_nents = 0, len, blocks, rem;
+	u32 len, blocks, rem;
 	u32 i, tlen, tx_len, tx_buf = 0, rx_buf = 0, off = 0;
 	u8 *tags;
 
@@ -707,9 +707,6 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 		rem = msg->len - (blocks - 1) * limit;
 
 		if (msg->flags & I2C_M_RD) {
-			rx_nents += (blocks * 2) + 1;
-			tx_nents += 1;
-
 			while (qup->blk.pos < blocks) {
 				tlen = (i == (blocks - 1)) ? rem : limit;
 				tags = &qup->start_tag.start[off + len];
@@ -748,8 +745,6 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 			if (ret)
 				return ret;
 		} else {
-			tx_nents += (blocks * 2);
-
 			while (qup->blk.pos < blocks) {
 				tlen = (i == (blocks - 1)) ? rem : limit;
 				tags = &qup->start_tag.start[off + tx_len];
@@ -775,7 +770,7 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 
 			if (idx == (num - 1)) {
 				len = 1;
-				if (rx_nents) {
+				if (rx_buf) {
 					qup->btx.tag.start[0] =
 							QUP_BAM_INPUT_EOT;
 					len++;
@@ -787,14 +782,13 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 						     len, qup, DMA_TO_DEVICE);
 				if (ret)
 					return ret;
-				tx_nents += 1;
 			}
 		}
 		idx++;
 		msg++;
 	}
 
-	txd = dmaengine_prep_slave_sg(qup->btx.dma, qup->btx.sg, tx_nents,
+	txd = dmaengine_prep_slave_sg(qup->btx.dma, qup->btx.sg, tx_buf,
 				      DMA_MEM_TO_DEV,
 				      DMA_PREP_INTERRUPT | DMA_PREP_FENCE);
 	if (!txd) {
@@ -803,7 +797,7 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 		goto desc_err;
 	}
 
-	if (!rx_nents) {
+	if (!rx_buf) {
 		txd->callback = qup_i2c_bam_cb;
 		txd->callback_param = qup;
 	}
@@ -816,9 +810,9 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 
 	dma_async_issue_pending(qup->btx.dma);
 
-	if (rx_nents) {
+	if (rx_buf) {
 		rxd = dmaengine_prep_slave_sg(qup->brx.dma, qup->brx.sg,
-					      rx_nents, DMA_DEV_TO_MEM,
+					      rx_buf, DMA_DEV_TO_MEM,
 					      DMA_PREP_INTERRUPT);
 		if (!rxd) {
 			dev_err(qup->dev, "failed to get rx desc\n");
@@ -853,7 +847,7 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 			goto desc_err;
 		}
 
-		if (rx_nents)
+		if (rx_buf)
 			writel(QUP_BAM_INPUT_EOT,
 			       qup->base + QUP_OUT_FIFO_BASE);
 
@@ -871,10 +865,10 @@ static int qup_i2c_bam_do_xfer(struct qup_i2c_dev *qup, struct i2c_msg *msg,
 	}
 
 desc_err:
-	dma_unmap_sg(qup->dev, qup->btx.sg, tx_nents, DMA_TO_DEVICE);
+	dma_unmap_sg(qup->dev, qup->btx.sg, tx_buf, DMA_TO_DEVICE);
 
-	if (rx_nents)
-		dma_unmap_sg(qup->dev, qup->brx.sg, rx_nents,
+	if (rx_buf)
+		dma_unmap_sg(qup->dev, qup->brx.sg, rx_buf,
 			     DMA_FROM_DEVICE);
 
 	return ret;
