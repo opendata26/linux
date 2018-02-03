@@ -192,6 +192,8 @@ struct qup_i2c_dev {
 	bool			is_dma;
 	/* To check if the current transfer is using DMA */
 	bool			use_dma;
+	/* The threshold length above which DMA will be used */
+	unsigned int		dma_threshold;
 	struct			dma_pool *dpool;
 	struct			qup_i2c_tag start_tag;
 	struct			qup_i2c_bam brx;
@@ -1294,7 +1296,8 @@ static int qup_i2c_xfer_v2(struct i2c_adapter *adap,
 			   int num)
 {
 	struct qup_i2c_dev *qup = i2c_get_adapdata(adap);
-	int ret, len, idx = 0;
+	int ret, idx = 0;
+	unsigned int total_len = 0;
 
 	qup->bus_err = 0;
 	qup->qup_err = 0;
@@ -1320,14 +1323,13 @@ static int qup_i2c_xfer_v2(struct i2c_adapter *adap,
 				goto out;
 			}
 
-			len = (msgs[idx].len > qup->out_fifo_sz) ||
-			      (msgs[idx].len > qup->in_fifo_sz);
-
-			if (is_vmalloc_addr(msgs[idx].buf) || !len)
+			if (is_vmalloc_addr(msgs[idx].buf))
 				break;
+
+			total_len += msgs[idx].len;
 		}
 
-		if (idx == num)
+		if (idx == num && total_len > qup->dma_threshold)
 			qup->use_dma = true;
 	}
 
@@ -1587,6 +1589,7 @@ nodma:
 
 	size = QUP_INPUT_FIFO_SIZE(io_mode);
 	qup->in_fifo_sz = qup->in_blk_sz * (2 << size);
+	qup->dma_threshold = min(qup->out_fifo_sz, qup->in_fifo_sz);
 
 	fs_div = ((src_clk_freq / clk_freq) / 2) - 3;
 	hs_div = 3;
