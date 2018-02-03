@@ -656,6 +656,7 @@
 	};
 
 	mdss@fd900000 {
+		status = "ok";
 		dsi@fd922800 {
 			ports {
 				port@1 {
