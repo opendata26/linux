@@ -1,0 +1,52 @@
+.artefacts-template: &artefacts-linux
+  paths:
+    - dtbImage.wiiu
+    - vmlinux
+
+linux-build:
+  stage: build
+  image: quarktheawesome/linux-wiiu-builder
+  script:
+  - make wiiu_defconfig $LINUXMK
+  - make $LINUXMK
+  - cp arch/powerpc/boot/dtbImage.wiiu dtbImage.wiiu
+  artifacts:
+    <<: *artefacts-linux
+    name: "${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
+    expire_in: 2 weeks
+    
+master-deploy-deb:
+  stage: deploy
+  image: ubuntu:14.04
+  allow_failure: true
+  only:
+  - master@linux-wiiu/linux-wiiu
+  before_script:
+  - apt update && apt -y install openssh-client git
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan -H 'gitlab.com' >> ~/.ssh/known_hosts
+  - eval $(ssh-agent -s)
+  - echo "$BOT_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  script:
+  - export PKG_VER=4.11.9.$(git shortlog HEAD | grep -E '^[ ]+\w+' | wc -l)
+  - ssh git@gitlab.com
+  - mkdir -p debian-pkg-temp/DEBIAN
+  - git config --global user.email $BOT_EMAIL
+  - git config --global user.name $BOT_USERNAME
+  - git clone git@gitlab.com:linux-wiiu/debian-wiiu-repo
+  - cp debian-wiiu-repo/debian/* debian-pkg-temp/DEBIAN/
+  - chmod 0555 debian-pkg-temp/DEBIAN/*
+  - mkdir -p debian-pkg-temp/$(dirname $(cat debian-wiiu-repo/debian/where))
+  - cp dtbImage.wiiu debian-pkg-temp/$(cat debian-wiiu-repo/debian/where)
+  - sed -i 's/{PACK}/linux-wiiu-git/g' debian-pkg-temp/DEBIAN/control
+  - sed -i s/\{VER\}/${PKG_VER}/g debian-pkg-temp/DEBIAN/control
+  - echo Packaging ${PKG_VER} \(${CI_COMMIT_SHA}\)
+  - dpkg-deb --build debian-pkg-temp
+  - mv *.deb linux-wiiu-git-${PKG_VER}.deb
+  - cp *.deb debian-wiiu-repo/debs/
+  - cd debian-wiiu-repo && git add debs/* && git commit -m "Add kernel version ${PKG_VER} from ${CI_PROJECT_PATH}/${CI_COMMIT_SHA}" && git push
+  artifacts:
+    paths:
+    - linux-wiiu-git-*.deb
+  
