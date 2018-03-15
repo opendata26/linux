@@ -1,0 +1,96 @@
+# SPDX-License-Identifier: GPL-2.0
+if CPU_CAVIUM_OCTEON
+
+config CAVIUM_CN63XXP1
+	bool "Enable CN63XXP1 errata workarounds"
+	default "n"
+	help
+	  The CN63XXP1 chip requires build time workarounds to
+	  function reliably, select this option to enable them.  These
+	  workarounds will cause a slight decrease in performance on
+	  non-CN63XXP1 hardware, so it is recommended to select "n"
+	  unless it is known the workarounds are needed.
+
+endif # CPU_CAVIUM_OCTEON
+
+if CAVIUM_OCTEON_SOC
+
+config CAVIUM_OCTEON_EXTRA_CVMSEG
+	int "Number of extra L1 cache lines reserved for CVMSEG memory"
+	range 0 50
+	default 0
+	help
+	  CVMSEG LM is a segment that accesses portions of the dcache
+	  as a local memory; the larger CVMSEG is, the smaller the
+	  cache is.  The kernel uses two or three blocks (one for TLB
+	  exception handlers, one for driver IOBDMA operations, and on
+	  models that need it, one for LMTDMA operations). This
+	  selects an optional extra number of CVMSEG lines for use by
+	  other software.
+
+	  Normally no extra lines are required, and this parameter
+	  should be set to zero.
+
+config CAVIUM_OCTEON_LOCK_L2
+	bool "Lock often used kernel code in the L2"
+	default "y"
+	help
+	  Enable locking parts of the kernel into the L2 cache.
+
+config CAVIUM_OCTEON_LOCK_L2_TLB
+	bool "Lock the TLB handler in L2"
+	depends on CAVIUM_OCTEON_LOCK_L2
+	default "y"
+	help
+	  Lock the low level TLB fast path into L2.
+
+config CAVIUM_OCTEON_LOCK_L2_EXCEPTION
+	bool "Lock the exception handler in L2"
+	depends on CAVIUM_OCTEON_LOCK_L2
+	default "y"
+	help
+	  Lock the low level exception handler into L2.
+
+config CAVIUM_OCTEON_LOCK_L2_LOW_LEVEL_INTERRUPT
+	bool "Lock the interrupt handler in L2"
+	depends on CAVIUM_OCTEON_LOCK_L2
+	default "y"
+	help
+	  Lock the low level interrupt handler into L2.
+
+config CAVIUM_OCTEON_LOCK_L2_INTERRUPT
+	bool "Lock the 2nd level interrupt handler in L2"
+	depends on CAVIUM_OCTEON_LOCK_L2
+	default "y"
+	help
+	  Lock the 2nd level interrupt handler in L2.
+
+config CAVIUM_OCTEON_LOCK_L2_MEMCPY
+	bool "Lock memcpy() in L2"
+	depends on CAVIUM_OCTEON_LOCK_L2
+	default "y"
+	help
+	  Lock the kernel's implementation of memcpy() into L2.
+
+config IOMMU_HELPER
+	bool
+
+config NEED_SG_DMA_LENGTH
+	bool
+
+config SWIOTLB
+	def_bool y
+	select DMA_DIRECT_OPS
+	select IOMMU_HELPER
+	select NEED_SG_DMA_LENGTH
+
+config OCTEON_ILM
+	tristate "Module to measure interrupt latency using Octeon CIU Timer"
+	help
+	  This driver is a module to measure interrupt latency using the
+	  the CIU Timers on Octeon.
+
+	  To compile this driver as a module, choose M here.  The module
+	  will be called octeon-ilm
+
+endif # CAVIUM_OCTEON_SOC
