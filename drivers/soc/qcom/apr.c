@@ -14,6 +14,7 @@
 #include <linux/soc/qcom/apr.h>
 #include <linux/rpmsg.h>
 #include <linux/of.h>
+#include <linux/dma-mapping.h>
 
 struct apr {
 	struct rpmsg_endpoint *ch;
@@ -280,6 +281,8 @@ static int apr_probe(struct rpmsg_device *rpdev)
 	apr = devm_kzalloc(dev, sizeof(*apr), GFP_KERNEL);
 	if (!apr)
 		return -ENOMEM;
+
+	dma_set_coherent_mask(dev, DMA_BIT_MASK(32));
 
 	ret = of_property_read_u32(dev->of_node, "qcom,apr-dest-domain-id",
 				   &apr->dest_domain_id);

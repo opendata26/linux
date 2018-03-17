@@ -1647,5 +1647,5 @@ int qcom_slim_qmi_init(struct msm_slim_ctrl *ctrl, bool apps_is_master)
 	qmi->ops.net_reset = qcom_slim_net_reset;
 
 	qmi_add_lookup(qmi, SLIMBUS_QMI_SVC_ID, 0, 0);
-
+	return 0;
 }

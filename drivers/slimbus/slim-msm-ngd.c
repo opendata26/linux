@@ -1308,6 +1308,8 @@ static ssize_t set_mask(struct device *device, struct device_attribute *attr,
 
 static DEVICE_ATTR(debug_mask, S_IRUGO | S_IWUSR, show_mask, set_mask);
 
+static int defer_count = 0;
+
 static int ngd_slim_probe(struct platform_device *pdev)
 {
 	struct msm_slim_ctrl *dev;
@@ -1318,6 +1320,10 @@ static int ngd_slim_probe(struct platform_device *pdev)
 	bool			rxreg_access = false;
 	bool			slim_mdm = false;
 	const char		*ext_modem_id = NULL;
+
+	printk("ngd_slim_probe\n");
+	if (++defer_count < 3)
+		return -EPROBE_DEFER;
 
 	slim_mem = platform_get_resource_byname(pdev, IORESOURCE_MEM,
 						"slimbus_physical");
