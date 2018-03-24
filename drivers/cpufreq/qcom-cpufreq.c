@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (c) 2018, The Linux Foundation. All rights reserved.
-
+#define DEBUG 1
 #include <linux/cpu.h>
 #include <linux/module.h>
 #include <linux/nvmem-consumer.h>
@@ -8,6 +8,7 @@
 #include <linux/platform_device.h>
 #include <linux/pm_opp.h>
 #include <linux/slab.h>
+#include <linux/io.h>
 
 static void __init get_krait_bin_format_a(int *speed, int *pvs, int *pvs_ver,
 					  struct nvmem_cell *pvs_nvmem, u8 *buf)
@@ -41,15 +42,24 @@ static void __init get_krait_bin_format_a(int *speed, int *pvs, int *pvs_ver,
 	kfree(buf);
 }
 
-static void __init get_krait_bin_format_b(int *speed, int *pvs, int *pvs_ver,
-					  struct nvmem_cell *pvs_nvmem, u8 *buf)
+static void __init get_krait_bin_format_b(int *speed, int *pvs, int *pvs_ver)
 {
 	u32 pte_efuse, redundant_sel;
+	void __iomem *base;
 
-	pte_efuse = *((u32 *)buf);
+	*speed = 0;
+	*pvs = 0;
+	*pvs_ver = 0;
+
+	base = ioremap(0xfc4b80b0, 8);
+	if (!base) {
+		pr_warn("Unable to read efuse data. Defaulting to 0!\n");
+		return;
+	}
+
+	pte_efuse = readl_relaxed(base);
 	redundant_sel = (pte_efuse >> 24) & 0x7;
 	*speed = pte_efuse & 0x7;
-
 	/* 4 bits of PVS are in efuse register bits 31, 8-6. */
 	*pvs = ((pte_efuse >> 28) & 0x8) | ((pte_efuse >> 6) & 0x7);
 	*pvs_ver = (pte_efuse >> 4) & 0x3;
@@ -72,7 +82,7 @@ static void __init get_krait_bin_format_b(int *speed, int *pvs, int *pvs_ver,
 	}
 
 	/* Check PVS_BLOW_STATUS */
-	pte_efuse = *(((u32 *)buf) + 4);
+	pte_efuse = readl_relaxed(base + 0x4) & BIT(21);
 	if (pte_efuse) {
 		pr_info("PVS bin: %d\n", *pvs);
 	} else {
@@ -81,25 +91,17 @@ static void __init get_krait_bin_format_b(int *speed, int *pvs, int *pvs_ver,
 	}
 
 	pr_info("PVS version: %d\n", *pvs_ver);
-	kfree(buf);
+	iounmap(base);
 }
 
-static int __init qcom_cpufreq_populate_opps(struct nvmem_cell *pvs_nvmem,
-					     struct opp_table **tbl)
+static int __init qcom_cpufreq_populate_opps(struct opp_table **tbl)
 {
 	int speed = 0, pvs = 0, pvs_ver = 0, cpu, ret;
 	struct device *cpu_dev;
-	u8 *buf;
 	size_t len;
 	char pvs_name[] = "speedXX-pvsXX-vXX";
 
-	buf = nvmem_cell_read(pvs_nvmem, &len);
-	if (len == 4)
-		get_krait_bin_format_a(&speed, &pvs, &pvs_ver, pvs_nvmem, buf);
-	else if (len == 8)
-		get_krait_bin_format_b(&speed, &pvs, &pvs_ver, pvs_nvmem, buf);
-	else
-		pr_warn("Unable to read nvmem data. Defaulting to 0!\n");
+	get_krait_bin_format_b(&speed, &pvs, &pvs_ver);
 
 	snprintf(pvs_name, sizeof(pvs_name), "speed%d-pvs%d-v%d",
 		 speed, pvs, pvs_ver);
@@ -144,14 +146,7 @@ static int __init qcom_cpufreq_driver_init(void)
 		goto free_np;
 	}
 
-	pvs_nvmem = of_nvmem_cell_get(np, NULL);
-	if (IS_ERR(pvs_nvmem)) {
-		dev_err(cpu_dev, "Could not get nvmem cell\n");
-		ret = PTR_ERR(pvs_nvmem);
-		goto free_np;
-	}
-
-	ret = qcom_cpufreq_populate_opps(pvs_nvmem, tbl);
+	ret = qcom_cpufreq_populate_opps(tbl);
 	if (ret)
 		goto free_opp_name;
 
