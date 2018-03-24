@@ -91,8 +91,8 @@
 			qcom,saw = <&saw0>;
 			cpu-idle-states = <&CPU_SPC>;
 			clocks = <&kraitcc 0>;
-			clock-names = "cpu";
 			clock-latency = <100000>;
+			clock-latency-ns = <100000>;
 			operating-points-v2 = <&cpu_opp_table>;
 		};
 
@@ -106,8 +106,8 @@
 			qcom,saw = <&saw1>;
 			cpu-idle-states = <&CPU_SPC>;
 			clocks = <&kraitcc 1>;
-			clock-names = "cpu";
 			clock-latency = <100000>;
+			clock-latency-ns = <100000>;
 			operating-points-v2 = <&cpu_opp_table>;
 		};
 
@@ -121,8 +121,8 @@
 			qcom,saw = <&saw2>;
 			cpu-idle-states = <&CPU_SPC>;
 			clocks = <&kraitcc 2>;
-			clock-names = "cpu";
 			clock-latency = <100000>;
+			clock-latency-ns = <100000>;
 			operating-points-v2 = <&cpu_opp_table>;
 		};
 
@@ -136,14 +136,17 @@
 			qcom,saw = <&saw3>;
 			cpu-idle-states = <&CPU_SPC>;
 			clocks = <&kraitcc 3>;
-			clock-names = "cpu";
 			clock-latency = <100000>;
+			clock-latency-ns = <100000>;
 			operating-points-v2 = <&cpu_opp_table>;
 		};
 
 		L2: l2-cache {
 			compatible = "cache";
 			cache-level = <2>;
+			clocks = <&kraitcc 4>;
+			clock-latency = <100000>;
+			clock-latency-ns = <100000>;
 			qcom,saw = <&saw_l2>;
 		};
 
@@ -476,13 +479,19 @@
 	cpu_opp_table: opp-table {
 		compatible = "operating-points-v2-krait-cpu";
 		nvmem-cells = <&pvs>;
-		opp-2265600000 {
-			opp-hz = /bits/ 64 <2265600000>;
-			opp-microvolt-speed1-pvs12-v1 = <1000000>;
-			opp-microamp-speed1-pvs12-v1 = <738>;
+	
+		opp-2112000000 {                                  
+		        opp-hz = /bits/ 64 <2112000000>;          
+			opp-microvolt-speed1-pvs12-v1 = <970000>;
+			clock-latency-ns = <100000>;
+			opp-microamp-speed1-pvs12-v1 = <669>;     
+			opp-microvolt-speed1-pvs3-v0 = <1000000>; 
+			opp-microamp-speed1-pvs3-v0 = <708>;      
 		};
+		
 		opp-300000000 {
 			opp-hz = /bits/ 64 <300000000>;
+			clock-latency-ns = <100000>;
 			opp-microvolt-speed1-pvs12-v1 = <775000>;
 			opp-microamp-speed1-pvs12-v1 = <76>;
 		};
@@ -620,25 +629,21 @@
 		acc0: clock-controller@f9088000 {
 			compatible = "qcom,kpss-acc-v2";
 			reg = <0xf9088000 0x1000>, <0xf9008000 0x1000>;
-			clock-output-names = "acpu0_aux";
 		};
 
 		acc1: clock-controller@f9098000 {
 			compatible = "qcom,kpss-acc-v2";
 			reg = <0xf9098000 0x1000>, <0xf9008000 0x1000>;
-			clock-output-names = "acpu1_aux";
 		};
 
 		acc2: clock-controller@f90a8000 {
 			compatible = "qcom,kpss-acc-v2";
 			reg = <0xf90a8000 0x1000>, <0xf9008000 0x1000>;
-			clock-output-names = "acpu2_aux";
 		};
 
 		acc3: clock-controller@f90b8000 {
 			compatible = "qcom,kpss-acc-v2";
 			reg = <0xf90b8000 0x1000>, <0xf9008000 0x1000>;
-			clock-output-names = "acpu3_aux";
 		};
 
 		restart@fc4ab000 {
