@@ -1321,7 +1321,13 @@ struct dma_buf *ion_share_dma_buf(struct ion_client *client,
 	ion_buffer_get(buffer);
 	mutex_unlock(&client->lock);
 
-	dmabuf = dma_buf_export(buffer, &dma_buf_ops, buffer->size, O_RDWR, NULL);
+	DEFINE_DMA_BUF_EXPORT_INFO(exp_info);
+
+	exp_info.ops = &dma_buf_ops;
+	exp_info.size = buffer->size;
+	exp_info.flags = O_RDWR;
+	exp_info.priv = buffer;
+	dmabuf = dma_buf_export(&exp_info);
 	if (IS_ERR(dmabuf)) {
 		ion_buffer_put(buffer);
 		return dmabuf;

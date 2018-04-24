@@ -40,8 +40,8 @@ static struct mdp5_kms *get_kms(struct drm_encoder *encoder)
 
 #ifdef CONFIG_MSM_BUS_SCALING
 #include <mach/board.h>
-#include <mach/msm_bus.h>
-#include <mach/msm_bus_board.h>
+#include <linux/msm-bus.h>
+#include <linux/msm-bus-board.h>
 #define MDP_BUS_VECTOR_ENTRY(ab_val, ib_val)		\
 	{						\
 		.src = MSM_BUS_MASTER_MDP_PORT0,	\

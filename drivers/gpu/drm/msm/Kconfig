@@ -4,6 +4,7 @@ config DRM_MSM
 	depends on DRM
 	depends on ARCH_MSM || (ARM && COMPILE_TEST)
 	select REGULATOR
+	select MFD_SYSCON
 	select DRM_KMS_HELPER
 	select DRM_PANEL
 	select SHMEM

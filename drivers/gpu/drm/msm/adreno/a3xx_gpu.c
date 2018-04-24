@@ -18,7 +18,7 @@
  */
 
 #ifdef CONFIG_MSM_OCMEM
-#  include <mach/ocmem.h>
+#  include <soc/qcom/ocmem.h>
 #endif
 
 #include "a3xx_gpu.h"
