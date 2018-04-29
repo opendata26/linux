@@ -405,6 +405,10 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 	ret = component_bind_all(dev, ddev);
 	if (ret) {
 		msm_mdss_destroy(ddev);
+		unsigned long attrs = DMA_ATTR_NO_KERNEL_MAPPING;
+		drm_mm_takedown(&priv->vram.mm);
+		dma_free_attrs(dev, priv->vram.size, NULL,
+			       priv->vram.paddr, attrs);
 		kfree(priv);
 		drm_dev_unref(ddev);
 		return ret;

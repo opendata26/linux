@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0
+ SPDX-License-Identifier: GPL-2.0
 dtb-$(CONFIG_ARCH_ALPINE) += \
 	alpine-db.dtb
 dtb-$(CONFIG_MACH_ARTPEC6) += \
@@ -767,6 +767,8 @@ dtb-$(CONFIG_ARCH_QCOM) += \
 	qcom-msm8974-lge-nexus5-hammerhead.dtb \
 	qcom-msm8974-samsung-klte.dtb \
 	qcom-msm8974-sony-xperia-castor.dtb \
+	qcom-msm8974-sony-xperia-leo.dtb \
+	qcom-msm8974-sony-xperia-sirius.dtb \
 	qcom-msm8974-sony-xperia-honami.dtb \
 	qcom-mdm9615-wp8548-mangoh-green.dtb
 dtb-$(CONFIG_ARCH_REALVIEW) += \

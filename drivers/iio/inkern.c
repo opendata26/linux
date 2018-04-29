@@ -555,17 +555,17 @@ static int iio_channel_read(struct iio_channel *chan, int *val, int *val2,
 int iio_read_channel_raw(struct iio_channel *chan, int *val)
 {
 	int ret;
-
+/*
 	mutex_lock(&chan->indio_dev->info_exist_lock);
 	if (chan->indio_dev->info == NULL) {
 		ret = -ENODEV;
 		goto err_unlock;
 	}
-
+*/
 	ret = iio_channel_read(chan, val, NULL, IIO_CHAN_INFO_RAW);
-err_unlock:
-	mutex_unlock(&chan->indio_dev->info_exist_lock);
-
+//err_unlock:
+//	mutex_unlock(&chan->indio_dev->info_exist_lock);
+//
 	return ret;
 }
 EXPORT_SYMBOL_GPL(iio_read_channel_raw);

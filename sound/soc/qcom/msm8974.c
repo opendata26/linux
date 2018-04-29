@@ -45,7 +45,7 @@ static int apq8096_audrx_init(struct snd_soc_pcm_runtime *rtd)
 	 * TX1, TX2, TX3, TX4, TX5, TX6, TX7, TX8, TX9, TX10, TX11, TX12, TX13
 	 * TX14, TX15, TX16
 	 */
-	unsigned int rx_ch[] = {144, 145};
+	unsigned int rx_ch[] = {144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156};
 	unsigned int tx_ch[] = {};
 
 	/*snd_soc_dapm_add_routes(dapm, wcd9335_audio_paths,
@@ -196,19 +196,19 @@ static int msm_snd_apq8096_probe(struct apr_device *adev)
 }
 
 static const struct of_device_id msm_snd_apq8096_dt_match[] = {
-	{.compatible = "qcom,apq8096-sndcard"},
+	{.compatible = "qcom,apq80-sndcard"},
 	{}
 };
 
-static struct apr_driver msm_snd_apq8096_driver = {
+static struct apr_driver msm_snd_apq80_driver = {
 	.probe  = msm_snd_apq8096_probe,
 	.driver = {
-		.name = "msm-snd-apq8096",
+		.name = "msm-snd-apq80",
 		.owner = THIS_MODULE,
 		.of_match_table = msm_snd_apq8096_dt_match,
 	},
 };
-module_apr_driver(msm_snd_apq8096_driver);
+module_apr_driver(msm_snd_apq80_driver);
 MODULE_AUTHOR("Srinivas Kandagatla <srinivas.kandagatla@linaro.org");
 MODULE_DESCRIPTION("APQ8096 ASoC Machine Driver");
 MODULE_LICENSE("GPL v2");

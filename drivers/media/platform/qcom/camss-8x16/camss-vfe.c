@@ -1793,6 +1793,7 @@ static irqreturn_t vfe_isr(int irq, void *dev)
 	value0 = readl_relaxed(vfe->base + VFE_0_IRQ_STATUS_0);
 	value1 = readl_relaxed(vfe->base + VFE_0_IRQ_STATUS_1);
 
+	printk("~~~~~~~~VAL1:%u~~~~~~VAL2:%u~~~~~~~~~~", value0, value1);
 	writel_relaxed(value0, vfe->base + VFE_0_IRQ_CLEAR_0);
 	writel_relaxed(value1, vfe->base + VFE_0_IRQ_CLEAR_1);
 

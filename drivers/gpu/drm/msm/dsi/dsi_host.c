@@ -337,6 +337,8 @@ static int dsi_clk_init(struct msm_dsi_host *msm_host)
 	const struct msm_dsi_cfg_handler *cfg_hnd = msm_host->cfg_hnd;
 	const struct msm_dsi_config *cfg = cfg_hnd->cfg;
 	int i, ret = 0;
+	struct clk *s0_clk;
+struct clk *mmssnoc_clk;
 
 	/* get bus clocks */
 	for (i = 0; i < cfg->num_bus_clks; i++) {
@@ -430,6 +432,19 @@ static int dsi_clk_init(struct msm_dsi_host *msm_host)
 				__func__, ret);
 		}
 	}
+
+
+#if 1
+	mmssnoc_clk = msm_clk_get(pdev, "mmssnoc");
+	clk_set_rate(mmssnoc_clk, 100000000);
+	clk_prepare_enable(mmssnoc_clk);
+#endif
+
+#if 1
+	s0_clk = msm_clk_get(pdev, "s0_axi");
+	clk_set_rate(s0_clk, 100000000);
+	clk_prepare_enable(s0_clk);
+#endif
 exit:
 	return ret;
 }

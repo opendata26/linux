@@ -260,15 +260,8 @@ static int rmi_i2c_probe(struct i2c_client *client,
 
 	i2c_set_clientdata(client, rmi_i2c);
 
-	/*
-	 * Setting the page to zero will (a) make sure the PSR is in a
-	 * known state, and (b) make sure we can talk to the device.
-	 */
-	error = rmi_set_page(rmi_i2c, 0);
-	if (error) {
-		dev_err(&client->dev, "Failed to set page select to 0\n");
-		return error;
-	}
+	/* Trigger a page select on next operation */
+	rmi_i2c->page = -1;
 
 	dev_info(&client->dev, "registering I2C-connected sensor\n");
 

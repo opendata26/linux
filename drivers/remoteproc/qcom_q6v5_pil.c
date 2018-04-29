@@ -214,7 +214,7 @@ static int q6v5_regulator_enable(struct q6v5 *qproc,
 	int i;
 
 	for (i = 0; i < count; i++) {
-		if (regs[i].uV > 0) {
+	/*	if (regs[i].uV > 0) {
 			ret = regulator_set_voltage(regs[i].reg,
 					regs[i].uV, INT_MAX);
 			if (ret) {
@@ -224,7 +224,7 @@ static int q6v5_regulator_enable(struct q6v5 *qproc,
 				goto err;
 			}
 		}
-
+		*/
 		if (regs[i].uA > 0) {
 			ret = regulator_set_load(regs[i].reg,
 						 regs[i].uA);
@@ -246,10 +246,10 @@ static int q6v5_regulator_enable(struct q6v5 *qproc,
 err:
 	for (; i >= 0; i--) {
 		if (regs[i].uV > 0)
-			regulator_set_voltage(regs[i].reg, 0, INT_MAX);
+		//	regulator_set_voltage(regs[i].reg, 0, INT_MAX);
 
 		if (regs[i].uA > 0)
-			regulator_set_load(regs[i].reg, 0);
+		//	regulator_set_load(regs[i].reg, 0);
 
 		regulator_disable(regs[i].reg);
 	}
@@ -263,9 +263,9 @@ static void q6v5_regulator_disable(struct q6v5 *qproc,
 	int i;
 
 	for (i = 0; i < count; i++) {
-		if (regs[i].uV > 0)
+	/*	if (regs[i].uV > 0)
 			regulator_set_voltage(regs[i].reg, 0, INT_MAX);
-
+		*/
 		if (regs[i].uA > 0)
 			regulator_set_load(regs[i].reg, 0);
 
@@ -573,13 +573,15 @@ static int q6v5_mpss_init_image(struct q6v5 *qproc, const struct firmware *fw)
 	writel(phys, qproc->rmb_base + RMB_PMI_META_DATA_REG);
 	writel(RMB_CMD_META_DATA_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
 
+	/*
+
 	ret = q6v5_rmb_mba_wait(qproc, RMB_MBA_META_DATA_AUTH_SUCCESS, 1000);
 	if (ret == -ETIMEDOUT)
 		dev_err(qproc->dev, "MPSS header authentication timed out\n");
 	else if (ret < 0)
 		dev_err(qproc->dev, "MPSS header authentication failed: %d\n", ret);
 
-	/* Metadata authentication done, remove modem access */
+	Metadata authentication done, remove modem access */
 	xferop_ret = q6v5_xfer_mem_ownership(qproc, &mdata_perm,
 					     false, phys, fw->size);
 	if (xferop_ret)
@@ -709,19 +711,13 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 		goto release_firmware;
 	}
 
-#if 0
-	boot_addr = relocate ? qproc->mpss_phys : min_addr;
-	writel(boot_addr, qproc->rmb_base + RMB_PMI_CODE_START_REG);
-	writel(RMB_CMD_LOAD_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
-	writel(size, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
-#endif
-
 	ret = q6v5_rmb_mba_wait(qproc, RMB_MBA_AUTH_COMPLETE, 10000);
 	if (ret == -ETIMEDOUT)
 		dev_err(qproc->dev, "MPSS authentication timed out\n");
 	else if (ret < 0)
 		dev_err(qproc->dev, "MPSS authentication failed: %d\n", ret);
 
+	ret = 0;
 release_firmware:
 	release_firmware(fw);
 

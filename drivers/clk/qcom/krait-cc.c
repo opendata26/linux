@@ -355,7 +355,7 @@ static int krait_cc_probe(struct platform_device *pdev)
 	 * circumstances.
 	 */
 	cur_rate = clk_get_rate(l2_pri_mux_clk);
-	aux_rate = 2112000000;
+	aux_rate = 300000000;
 	if (cur_rate == 1) {
 		pr_info("L2 @ QSB rate. Forcing new rate.\n");
 		cur_rate = aux_rate;

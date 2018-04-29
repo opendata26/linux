@@ -464,6 +464,40 @@
 	};
 
 	firmware {
+                android {
+                        compatible = "android,firmware";
+                        fstab {
+                                compatible = "android,fstab";
+                                system {
+                                        compatible = "android,system";
+                                        dev = "/dev/block/platform/soc/f9824900.sdhci/by-name/system";
+                                        type = "ext4";
+                                        mnt_flags = "ro,barrier=1,discard";
+                                        fsmgr_flags = "wait";
+                                        status = "ok";
+                                };
+                                data {
+                                        compatible = "android,data";
+                                        dev = "/dev/block/platform/soc/f9824900.sdhci/by-name/userdata";
+                                        type = "ext4";
+                                        mnt_flags = "rw,nodiscard";
+                                        fsmgr_flags = "wait";
+                                        status = "ok";
+                                };
+
+                                vendor {
+                                        compatible = "android,vendor";
+                                        dev = "/dev/block/platform/soc/f9824900.sdhci/by-name/cache";
+                                        type = "ext4";
+                                        mnt_flags = "ro,barrier=1,discard";
+                                        fsmgr_flags = "wait";
+                                        status = "ok";
+                                };
+
+                        };
+                };
+
+
 		scm {
 			compatible = "qcom,scm";
 			clocks = <&gcc GCC_CE1_CLK>, <&gcc GCC_CE1_AXI_CLK>, <&gcc GCC_CE1_AHB_CLK>;

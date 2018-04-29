@@ -169,6 +169,15 @@ config DRM_PANEL_SHARP_LS043T1LE01
 	  Say Y here if you want to enable support for Sharp LS043T1LE01 qHD
 	  (540x960) DSI panel as found on the Qualcomm APQ8074 Dragonboard
 
+config DRM_PANEL_SHARP_LS052T3SX02
+	tristate "Sharp LS052T3SX02 1080p panel"
+	depends on OF
+	depends on DRM_MIPI_DSI
+	depends on BACKLIGHT_CLASS_DEVICE
+	help
+	  Say Y here if you want to enable support for Sharp LS052T3SX02 
+	  1080p (1920x1080) DSI panel as found on some Xperia Z2 devices
+
 config DRM_PANEL_SITRONIX_ST7789V
 	tristate "Sitronix ST7789V panel"
 	depends on OF && SPI
@@ -176,5 +185,14 @@ config DRM_PANEL_SITRONIX_ST7789V
 	help
 	  Say Y here if you want to enable support for the Sitronix
 	  ST7789V controller for 240x320 LCD panels
+
+config DRM_PANEL_AUO_NOVATEK_1080P
+	tristate "AUO Novatek 1080p video mode panel"
+	depends on OF
+	depends on DRM_MIPI_DSI
+	depends on BACKLIGHT_CLASS_DEVICE
+	help
+	  Say Y here if you want to enable support for AUO 1080p DSI panel
+	  as found in some Sony XPERIA Z3 devices
 
 endmenu
